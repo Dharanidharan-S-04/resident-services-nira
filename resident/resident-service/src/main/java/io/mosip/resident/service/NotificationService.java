@@ -153,26 +153,122 @@ public class NotificationService {
 		}
 		if(channels == null || channels.isEmpty() || channels.stream().collect(Collectors.joining(",")).isEmpty() || channels.stream().collect(Collectors.joining(",")).equals("null")) {
 			if (notificationType.equalsIgnoreCase("SMS|EMAIL")) {
-				emailStatus = sendEmailNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, null,
-						templateLangauges, null);
-				smsStatus = sendSMSNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, templateLangauges);
-			} else if (notificationType.equalsIgnoreCase("EMAIL")) {
+				try {
 					emailStatus = sendEmailNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, null,
 							templateLangauges, null);
-			} else if (notificationType.equalsIgnoreCase("SMS")) {
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+
+					logger.error(
+							LoggerFileConstant.APPLICATIONID.toString(),
+							LoggerFileConstant.UIN.name(),
+							notificationEventId,
+							"email notification failed but flow continued :: " + e.getMessage()
+					);
+				}
+				try {
 					smsStatus = sendSMSNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, templateLangauges);
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+
+					logger.error(
+							LoggerFileConstant.APPLICATIONID.toString(),
+							LoggerFileConstant.UIN.name(),
+							notificationEventId,
+							"SMS notification failed but flow continued :: " + e.getMessage()
+					);
+				}
+			} else if (notificationType.equalsIgnoreCase("EMAIL")) {
+				   try {
+					   emailStatus = sendEmailNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, null,
+							   templateLangauges, null);
+				   }
+				   catch (Exception e) {
+					   e.printStackTrace();
+
+					   logger.error(
+							   LoggerFileConstant.APPLICATIONID.toString(),
+							   LoggerFileConstant.UIN.name(),
+							   notificationEventId,
+							   "email notification failed but flow continued :: " + e.getMessage()
+					   );
+				   }
+			} else if (notificationType.equalsIgnoreCase("SMS")) {
+				try {
+					smsStatus = sendSMSNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, templateLangauges);
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+
+					logger.error(
+							LoggerFileConstant.APPLICATIONID.toString(),
+							LoggerFileConstant.UIN.name(),
+							notificationEventId,
+							"SMS notification failed but flow continued :: " + e.getMessage()
+					);
+				}
 			}
 		} else {
 			List<String> channelsLowerCase = channels.stream().map(String::toLowerCase).collect(Collectors.toList());
 			if (channelsLowerCase.contains(PHONE_CHANNEL) && channelsLowerCase.contains(EMAIL_CHANNEL)) {
-				smsStatus = sendSMSNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, templateLangauges);
-				emailStatus = sendEmailNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, null,
-						templateLangauges, null);
+				try{
+					emailStatus = sendEmailNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, null,
+							templateLangauges, null);
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+
+					logger.error(
+							LoggerFileConstant.APPLICATIONID.toString(),
+							LoggerFileConstant.UIN.name(),
+							notificationEventId,
+							"email notification failed but flow continued :: " + e.getMessage()
+					);
+				}
+				try {
+					smsStatus = sendSMSNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, templateLangauges);
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+
+					logger.error(
+							LoggerFileConstant.APPLICATIONID.toString(),
+							LoggerFileConstant.UIN.name(),
+							notificationEventId,
+							"SMS notification failed but flow continued :: " + e.getMessage()
+					);
+				}
 			} else if (channelsLowerCase.contains(PHONE_CHANNEL)) {
-				smsStatus = sendSMSNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, templateLangauges);
+				try {
+					smsStatus = sendSMSNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, templateLangauges);
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+
+					logger.error(
+							LoggerFileConstant.APPLICATIONID.toString(),
+							LoggerFileConstant.UIN.name(),
+							notificationEventId,
+							"SMS notification failed but flow continued :: " + e.getMessage()
+					);
+				}
 			} else if (channelsLowerCase.contains(EMAIL_CHANNEL)) {
-				emailStatus = sendEmailNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, null,
-						templateLangauges, email);
+				try {
+					emailStatus = sendEmailNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, null,
+							templateLangauges, email);
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+
+					logger.error(
+							LoggerFileConstant.APPLICATIONID.toString(),
+							LoggerFileConstant.UIN.name(),
+							notificationEventId,
+							"email notification failed but flow continued :: " + e.getMessage()
+					);
+				}
 			}
 		}
 
