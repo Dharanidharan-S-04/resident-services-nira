@@ -389,31 +389,31 @@ public class NotificationService {
 				HttpClientErrorException httpClientException = (HttpClientErrorException) e.getCause();
 				logger.error(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.REGISTRATIONID.toString(), "",
 						e.getMessage() + httpClientException.getResponseBodyAsString());
-				throw new ResidentServiceCheckedException(
-						ResidentErrorCode.API_RESOURCE_ACCESS_EXCEPTION.getErrorCode(),
-						httpClientException.getResponseBodyAsString());
+				// throw new ResidentServiceCheckedException(
+				// 		ResidentErrorCode.API_RESOURCE_ACCESS_EXCEPTION.getErrorCode(),
+				// 		httpClientException.getResponseBodyAsString());
 
 			} else if (e.getCause() instanceof HttpServerErrorException) {
 				HttpServerErrorException httpServerException = (HttpServerErrorException) e.getCause();
 				logger.error(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.REGISTRATIONID.toString(), "",
 						e.getMessage() + httpServerException.getResponseBodyAsString());
-				throw new ResidentServiceCheckedException(
-						ResidentErrorCode.API_RESOURCE_ACCESS_EXCEPTION.getErrorCode(),
-						httpServerException.getResponseBodyAsString());
+				// throw new ResidentServiceCheckedException(
+				// 		ResidentErrorCode.API_RESOURCE_ACCESS_EXCEPTION.getErrorCode(),
+				// 		httpServerException.getResponseBodyAsString());
 			} else {
 				logger.error(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.REGISTRATIONID.toString(), "",
 						e.getMessage() + ExceptionUtils.getStackTrace(e));
-				throw new ResidentServiceCheckedException(
-						ResidentErrorCode.API_RESOURCE_ACCESS_EXCEPTION.getErrorCode(),
-						ResidentErrorCode.API_RESOURCE_ACCESS_EXCEPTION.getErrorMessage() + e.getMessage(), e);
+				// throw new ResidentServiceCheckedException(
+				// 		ResidentErrorCode.API_RESOURCE_ACCESS_EXCEPTION.getErrorCode(),
+				// 		ResidentErrorCode.API_RESOURCE_ACCESS_EXCEPTION.getErrorMessage() + e.getMessage(), e);
 			}
 
 		} catch (IOException e) {
 			logger.error(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.REGISTRATIONID.toString(), "",
 					e.getMessage() + ExceptionUtils.getStackTrace(e));
 			audit.setAuditRequestDto(AuditEnum.TOKEN_GENERATION_FAILED);
-			throw new ResidentServiceCheckedException(ResidentErrorCode.TOKEN_GENERATION_FAILED.getErrorCode(),
-					ResidentErrorCode.TOKEN_GENERATION_FAILED.getErrorMessage(), e);
+			// throw new ResidentServiceCheckedException(ResidentErrorCode.TOKEN_GENERATION_FAILED.getErrorCode(),
+			// 		ResidentErrorCode.TOKEN_GENERATION_FAILED.getErrorMessage(), e);
 		}
 		logger.debug(LoggerFileConstant.APPLICATIONID.toString(), LoggerFileConstant.UIN.name(), " ",
 				"NotificationService::sendSMSNotification()::exit");
