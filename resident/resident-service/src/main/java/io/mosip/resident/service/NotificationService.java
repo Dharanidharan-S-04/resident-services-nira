@@ -153,122 +153,26 @@ public class NotificationService {
 		}
 		if(channels == null || channels.isEmpty() || channels.stream().collect(Collectors.joining(",")).isEmpty() || channels.stream().collect(Collectors.joining(",")).equals("null")) {
 			if (notificationType.equalsIgnoreCase("SMS|EMAIL")) {
-				try {
+				emailStatus = sendEmailNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, null,
+						templateLangauges, null);
+				smsStatus = sendSMSNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, templateLangauges);
+			} else if (notificationType.equalsIgnoreCase("EMAIL")) {
 					emailStatus = sendEmailNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, null,
 							templateLangauges, null);
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-
-					logger.error(
-							LoggerFileConstant.APPLICATIONID.toString(),
-							LoggerFileConstant.UIN.name(),
-							notificationEventId,
-							"email notification failed but flow continued :: " + e.getMessage()
-					);
-				}
-				try {
-					smsStatus = sendSMSNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, templateLangauges);
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-
-					logger.error(
-							LoggerFileConstant.APPLICATIONID.toString(),
-							LoggerFileConstant.UIN.name(),
-							notificationEventId,
-							"SMS notification failed but flow continued :: " + e.getMessage()
-					);
-				}
-			} else if (notificationType.equalsIgnoreCase("EMAIL")) {
-				   try {
-					   emailStatus = sendEmailNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, null,
-							   templateLangauges, null);
-				   }
-				   catch (Exception e) {
-					   e.printStackTrace();
-
-					   logger.error(
-							   LoggerFileConstant.APPLICATIONID.toString(),
-							   LoggerFileConstant.UIN.name(),
-							   notificationEventId,
-							   "email notification failed but flow continued :: " + e.getMessage()
-					   );
-				   }
 			} else if (notificationType.equalsIgnoreCase("SMS")) {
-				try {
 					smsStatus = sendSMSNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, templateLangauges);
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-
-					logger.error(
-							LoggerFileConstant.APPLICATIONID.toString(),
-							LoggerFileConstant.UIN.name(),
-							notificationEventId,
-							"SMS notification failed but flow continued :: " + e.getMessage()
-					);
-				}
 			}
 		} else {
 			List<String> channelsLowerCase = channels.stream().map(String::toLowerCase).collect(Collectors.toList());
 			if (channelsLowerCase.contains(PHONE_CHANNEL) && channelsLowerCase.contains(EMAIL_CHANNEL)) {
-				try{
-					emailStatus = sendEmailNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, null,
-							templateLangauges, null);
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-
-					logger.error(
-							LoggerFileConstant.APPLICATIONID.toString(),
-							LoggerFileConstant.UIN.name(),
-							notificationEventId,
-							"email notification failed but flow continued :: " + e.getMessage()
-					);
-				}
-				try {
-					smsStatus = sendSMSNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, templateLangauges);
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-
-					logger.error(
-							LoggerFileConstant.APPLICATIONID.toString(),
-							LoggerFileConstant.UIN.name(),
-							notificationEventId,
-							"SMS notification failed but flow continued :: " + e.getMessage()
-					);
-				}
+				smsStatus = sendSMSNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, templateLangauges);
+				emailStatus = sendEmailNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, null,
+						templateLangauges, null);
 			} else if (channelsLowerCase.contains(PHONE_CHANNEL)) {
-				try {
-					smsStatus = sendSMSNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, templateLangauges);
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-
-					logger.error(
-							LoggerFileConstant.APPLICATIONID.toString(),
-							LoggerFileConstant.UIN.name(),
-							notificationEventId,
-							"SMS notification failed but flow continued :: " + e.getMessage()
-					);
-				}
+				smsStatus = sendSMSNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, templateLangauges);
 			} else if (channelsLowerCase.contains(EMAIL_CHANNEL)) {
-				try {
-					emailStatus = sendEmailNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, null,
-							templateLangauges, email);
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-
-					logger.error(
-							LoggerFileConstant.APPLICATIONID.toString(),
-							LoggerFileConstant.UIN.name(),
-							notificationEventId,
-							"email notification failed but flow continued :: " + e.getMessage()
-					);
-				}
+				emailStatus = sendEmailNotification(notificationAttributes, dto.getTemplateTypeCode(), notificationRequestType, notificationTemplateType, null,
+						templateLangauges, email);
 			}
 		}
 
@@ -376,16 +280,29 @@ public class NotificationService {
 	}
 
 	private boolean sendSMSNotification(Map<String, Object> mailingAttributes,
-			NotificationTemplateCode notificationTemplate, RequestType requestType, TemplateType templateType, Set<String> templateLangauges)
-			throws ResidentServiceCheckedException {
+			NotificationTemplateCode notificationTemplate, RequestType requestType, TemplateType templateType, Set<String> templateLangauges) {
 		logger.debug(LoggerFileConstant.APPLICATIONID.toString(), LoggerFileConstant.UIN.name(), " ",
 				"NotificationService::sendSMSNotification()::entry");
 		String eventId=(String) mailingAttributes.get(TemplateVariablesConstants.EVENT_ID);
 		String phone="";
-		if(mailingAttributes.get(TemplateVariablesConstants.PHONE)== null){
-			phone = (String) mailingAttributes.get(utilities.getPhoneAttribute());
-		} else{
-			phone =  (String) mailingAttributes.get(TemplateVariablesConstants.PHONE);
+		try {
+			if (mailingAttributes.get(TemplateVariablesConstants.PHONE) == null) {
+				phone = (String) mailingAttributes.get(utilities.getPhoneAttribute());
+			} else {
+				phone = (String) mailingAttributes.get(TemplateVariablesConstants.PHONE);
+			}
+		}
+		catch (ResidentServiceCheckedException e) {
+
+			logger.error(
+					LoggerFileConstant.APPLICATIONID.toString(),
+					LoggerFileConstant.UIN.name(),
+					eventId,
+					"Failed to fetch phone attribute, continuing flow :: "
+							+ ExceptionUtils.getStackTrace(e)
+			);
+
+			return false;
 		}
 
 		if (nullValueCheck(phone) || !(requestValidator.phoneValidator(phone))) {
@@ -394,30 +311,44 @@ public class NotificationService {
 			return false;
 		}
 		String mergedTemplate = "";
-		for (String language : templateLangauges) {
-			String languageTemplate = "";
-			if(notificationTemplate==null) {
-				if(mailingAttributes.get(TemplateVariablesConstants.PHONE)== null){
-					languageTemplate = templateMerge(getTemplate(language, templateUtil.getSmsTemplateTypeCode(requestType, templateType)),
-							requestType.getNotificationTemplateVariables(templateUtil, new NotificationTemplateVariableDTO(eventId, requestType, templateType, language), mailingAttributes));
-				} else{
-					languageTemplate = templateMerge(getTemplate(language, templateUtil.getSmsTemplateTypeCode(requestType, templateType)),
-							requestType.getNotificationTemplateVariables(templateUtil, new NotificationTemplateVariableDTO(eventId, requestType, templateType, language, (String) mailingAttributes.get(TemplateVariablesConstants.OTP)), mailingAttributes));
-				}
+		try {
+			for (String language : templateLangauges) {
+				String languageTemplate = "";
+				if (notificationTemplate == null) {
+					if (mailingAttributes.get(TemplateVariablesConstants.PHONE) == null) {
+						languageTemplate = templateMerge(getTemplate(language, templateUtil.getSmsTemplateTypeCode(requestType, templateType)),
+								requestType.getNotificationTemplateVariables(templateUtil, new NotificationTemplateVariableDTO(eventId, requestType, templateType, language), mailingAttributes));
+					} else {
+						languageTemplate = templateMerge(getTemplate(language, templateUtil.getSmsTemplateTypeCode(requestType, templateType)),
+								requestType.getNotificationTemplateVariables(templateUtil, new NotificationTemplateVariableDTO(eventId, requestType, templateType, language, (String) mailingAttributes.get(TemplateVariablesConstants.OTP)), mailingAttributes));
+					}
 
-			} else {
-				languageTemplate = templateMerge(getTemplate(language, notificationTemplate + SMS),
-						mailingAttributes);
+				} else {
+					languageTemplate = templateMerge(getTemplate(language, notificationTemplate + SMS),
+							mailingAttributes);
+				}
+				if (languageTemplate.trim().endsWith(LINE_BREAK)) {
+					languageTemplate = languageTemplate.substring(0, languageTemplate.length() - LINE_BREAK.length()).trim();
+				}
+				if (mergedTemplate.isBlank()) {
+					mergedTemplate = languageTemplate;
+				} else {
+					mergedTemplate = mergedTemplate + LINE_SEPARATOR
+							+ languageTemplate;
+				}
 			}
-			if(languageTemplate.trim().endsWith(LINE_BREAK)) {
-				languageTemplate = languageTemplate.substring(0, languageTemplate.length() - LINE_BREAK.length()).trim();
-			}
-			if (mergedTemplate.isBlank()) {
-				mergedTemplate = languageTemplate;
-			}else {
-				mergedTemplate = mergedTemplate + LINE_SEPARATOR
-						+ languageTemplate;
-			}
+		}
+		catch (ResidentServiceCheckedException e) {
+
+			logger.error(
+					LoggerFileConstant.APPLICATIONID.toString(),
+					LoggerFileConstant.UIN.name(),
+					eventId,
+					"Failed to prepare SMS template, continuing flow :: "
+							+ ExceptionUtils.getStackTrace(e)
+			);
+
+			return false;
 		}
 		SMSRequestDTO smsRequestDTO = new SMSRequestDTO();
 		smsRequestDTO.setMessage(mergedTemplate);
@@ -429,9 +360,17 @@ public class NotificationService {
 			resp = restClient.postApi(env.getProperty(ApiName.SMSNOTIFIER.name()), MediaType.APPLICATION_JSON, req,
 					ResponseWrapper.class);
 			if (nullCheckForResponse(resp)) {
-				throw new ResidentServiceException(ResidentErrorCode.INVALID_API_RESPONSE.getErrorCode(),
-						ResidentErrorCode.INVALID_API_RESPONSE.getErrorMessage() + " SMSNOTIFIER API"
-								+ (resp != null ? resp.getErrors().get(0) : ""));
+				// throw new ResidentServiceException(ResidentErrorCode.INVALID_API_RESPONSE.getErrorCode(),
+				// 		ResidentErrorCode.INVALID_API_RESPONSE.getErrorMessage() + " SMSNOTIFIER API"
+				// 				+ (resp != null ? resp.getErrors().get(0) : ""));
+				logger.error(
+						LoggerFileConstant.APPLICATIONID.toString(),
+						LoggerFileConstant.UIN.name(),
+						eventId,
+						"Invalid response from SMS notifier API, continuing flow"
+				);
+
+				return false;
 			}
 			NotificationResponseDTO notifierResponse = JsonUtil
 					.readValue(JsonUtil.writeValueAsString(resp.getResponse()), NotificationResponseDTO.class);
